@@ -883,6 +883,96 @@
     margin-bottom: var(--spacing-md);
 }
 
+/* 题型与难度徽章 */
+.quiz-question-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.quiz-meta-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.6;
+}
+
+.quiz-badge-type {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.quiz-badge-difficulty {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-secondary);
+}
+
+.quiz-difficulty-easy {
+    background-color: #EAF3E4;
+    color: var(--color-success);
+}
+
+.quiz-difficulty-medium {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+.quiz-difficulty-hard {
+    background-color: #F7E8E4;
+    color: var(--color-error);
+}
+
+/* 考查内容（知识点） */
+.quiz-question-kp {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-hint);
+    margin-bottom: var(--spacing-md);
+}
+
+/* 答题结果中的知识点列表 */
+.quiz-result-knowledge {
+    text-align: left;
+    background-color: var(--color-bg-input);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.knowledge-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.knowledge-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--spacing-xs) 0;
+}
+
+.knowledge-item + .knowledge-item {
+    border-top: 1px solid var(--color-border-light);
+}
+
+.knowledge-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.knowledge-observable {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
 .quiz-hint-section {
     display: flex;
     flex-direction: column;

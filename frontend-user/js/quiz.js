@@ -1,10 +1,11 @@
 /**
  * 光学测验管理器
- * 
+ *
  * 功能：
+ * - 从题库清单（data/quiz-manifest.js）取题，加载时经 QuizValidator 校验
  * - 随机选择测验题目
  * - 验证用户答案（透镜类型、参数、光线模式等）
- * - 评分并给出详细解释
+ * - 评分并给出详细解释与知识点可观察现象
  * - 提供提示功能
  * - 记录答题历史
  */
@@ -19,17 +20,62 @@ class QuizManager {
         this.hintUsed = false;
         this.isQuizMode = false;
         this.answeredQuestions = new Set();
+
+        // 从清单加载题库（缺少必填内容或引用不存在知识点的条目会被跳过）
+        const report = this.loadQuestionBank();
+        this.questions = report.questions;
+        this.knowledgePoints = report.knowledgePoints;
     }
-    
+
+    /**
+     * 加载并校验题库清单
+     * 与容器构建时使用同一套校验（js/quiz-validator.js）
+     */
+    loadQuestionBank() {
+        const emptyReport = { questions: [], knowledgePoints: {}, skipped: [], fatal: ['题库清单未加载'] };
+
+        if (typeof QuizValidator === 'undefined') {
+            console.error('[题库] 校验器 QuizValidator 未加载，请检查 js/quiz-validator.js 是否引入。');
+            return emptyReport;
+        }
+        if (typeof QUIZ_MANIFEST === 'undefined') {
+            console.error('[题库] 题库清单 QUIZ_MANIFEST 未加载，请检查 data/quiz-manifest.js 是否引入。');
+            return emptyReport;
+        }
+
+        const report = QuizValidator.validate(QUIZ_MANIFEST);
+
+        if (report.fatal.length > 0) {
+            report.fatal.forEach(message => console.error(`[题库] ${message}`));
+        }
+        if (report.skipped.length > 0) {
+            console.groupCollapsed(`[题库] 跳过 ${report.skipped.length} 条无效条目`);
+            report.skipped.forEach(item => {
+                console.warn(`[${item.kind}] ${item.id}：${item.reason}`);
+            });
+            console.groupEnd();
+        }
+        console.log(`[题库] 清单校验完成：${report.stats.validQuestions}/${report.stats.totalQuestions} 道题目可用，` +
+            `${report.stats.validKnowledgePoints}/${report.stats.totalKnowledgePoints} 个知识点可用`);
+
+        return report;
+    }
+
     /**
      * 开启测验模式
+     * @returns {boolean} 题库为空时返回 false
      */
     startQuizMode() {
+        if (this.questions.length === 0) {
+            console.error('[题库] 没有可用题目，无法开启测验模式。');
+            return false;
+        }
         this.isQuizMode = true;
         this.score = 0;
         this.totalQuestions = 0;
         this.answeredQuestions.clear();
         this.nextQuestion();
+        return true;
     }
     
     /**
@@ -43,12 +89,17 @@ class QuizManager {
     }
     
     /**
-     * 获取下一道随机题目
+     * 获取下一道随机题目（取自题库清单）
      */
     nextQuestion() {
-        const questions = CONFIG.QUIZ_QUESTIONS;
+        const questions = this.questions;
+        if (questions.length === 0) {
+            this.currentQuestion = null;
+            return null;
+        }
+
         let availableQuestions = questions.filter(q => !this.answeredQuestions.has(q.id));
-        
+
         if (availableQuestions.length === 0) {
             this.answeredQuestions.clear();
             availableQuestions = questions;
@@ -327,7 +378,8 @@ class QuizManager {
             totalQuestions: this.totalQuestions,
             explanation: explanation,
             details: results,
-            hintUsed: this.hintUsed
+            hintUsed: this.hintUsed,
+            knowledgePoints: question.knowledgePoints
         };
     }
     

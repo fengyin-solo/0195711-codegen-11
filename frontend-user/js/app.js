@@ -141,11 +141,20 @@ class App {
      * 开始测验模式
      */
     startQuizMode() {
+        // 题库为空（清单校验未通过）时不进入测验模式
+        if (this.quizManager.questions.length === 0) {
+            Utils.showToast('题库为空或清单校验未通过，请检查 data/quiz-manifest.js', 'error');
+            return;
+        }
+
         // 清空画布
         this.canvasManager.clear();
-        
+
         // 启动测验
-        this.quizManager.startQuizMode();
+        if (!this.quizManager.startQuizMode()) {
+            Utils.showToast('题库为空或清单校验未通过，请检查 data/quiz-manifest.js', 'error');
+            return;
+        }
         
         // 更新UI
         const btnQuizMode = document.getElementById('btn-quiz-mode');
@@ -231,12 +240,30 @@ class App {
      * 更新测验面板内容
      */
     updateQuizPanel(question) {
+        if (!question) return;
+
+        // 更新题型与难度徽章
+        const metaEl = document.getElementById('quiz-question-meta');
+        if (metaEl) {
+            metaEl.innerHTML = `
+                <span class="quiz-meta-badge quiz-badge-type">${question.typeLabel || question.type}</span>
+                <span class="quiz-meta-badge quiz-badge-difficulty quiz-difficulty-${question.difficulty}">${question.difficultyLabel || question.difficulty}</span>
+            `;
+        }
+
         // 更新题目标题和描述
         const titleEl = document.getElementById('quiz-question-title');
         const descEl = document.getElementById('quiz-question-desc');
-        
+
         if (titleEl) titleEl.textContent = question.title;
         if (descEl) descEl.textContent = question.description;
+
+        // 更新考查内容（知识点）
+        const kpEl = document.getElementById('quiz-question-kp');
+        if (kpEl) {
+            const names = (question.knowledgePoints || []).map(kp => kp.name);
+            kpEl.textContent = names.length > 0 ? `考查：${names.join('、')}` : '';
+        }
         
         // 隐藏提示
         const hintText = document.getElementById('quiz-hint-text');
@@ -339,6 +366,23 @@ class App {
         const explanationEl = document.getElementById('quiz-result-explanation');
         if (explanationEl) {
             explanationEl.textContent = result.explanation;
+        }
+
+        // 更新考查知识点及可观察现象
+        const knowledgeEl = document.getElementById('quiz-result-knowledge');
+        if (knowledgeEl) {
+            if (result.knowledgePoints && result.knowledgePoints.length > 0) {
+                knowledgeEl.innerHTML = '<div class="knowledge-title">📚 本题考查</div>' +
+                    result.knowledgePoints.map(kp => `
+                        <div class="knowledge-item">
+                            <span class="knowledge-name">${kp.name}</span>
+                            <span class="knowledge-observable">可观察：${kp.observable}</span>
+                        </div>
+                    `).join('');
+                knowledgeEl.style.display = 'block';
+            } else {
+                knowledgeEl.style.display = 'none';
+            }
         }
         
         // 更新详细检查项

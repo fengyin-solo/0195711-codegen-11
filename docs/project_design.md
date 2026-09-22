@@ -138,27 +138,40 @@ erDiagram
 ```
 frontend-user/
 ├── index.html          # 主入口
-├── Dockerfile          # Docker配置
+├── Dockerfile          # Docker配置（构建阶段校验题库清单）
+├── data/
+│   └── quiz-manifest.js   # 测验题库清单（题目/知识点/提示的唯一数据源）
 ├── css/
 │   ├── reset.css       # 样式重置
 │   ├── variables.css   # CSS变量
 │   ├── layout.css      # 布局样式
 │   ├── components.css  # 组件样式
 │   └── responsive.css  # 响应式样式
-└── js/
-    ├── app.js          # 应用入口
-    ├── config.js       # 配置常量
-    ├── storage.js      # 本地存储
-    ├── guide.js        # 引导系统
-    ├── canvas.js       # 画布管理
-    ├── renderer.js     # 光路渲染
-    ├── physics.js      # 物理计算
-    ├── interaction.js  # 交互处理
-    └── utils.js        # 工具函数
+├── js/
+│   ├── app.js             # 应用入口
+│   ├── config.js          # 配置常量
+│   ├── storage.js         # 本地存储
+│   ├── guide.js           # 引导系统
+│   ├── canvas.js          # 画布管理
+│   ├── renderer.js        # 光路渲染
+│   ├── physics.js         # 物理计算
+│   ├── interaction.js     # 交互处理
+│   ├── quiz.js            # 测验管理器（从清单取题）
+│   ├── quiz-validator.js  # 题库清单校验（浏览器/Node 共用）
+│   └── utils.js           # 工具函数
+└── tools/
+    └── validate-quiz.js   # 清单校验 Node 入口（本地与容器构建共用）
 ```
 
-## 七、核心交互流程
+## 七、测验题库清单维护
 
+题目、知识点与答题提示集中在 `data/quiz-manifest.js` 维护，页面代码不包含任何题目数据，调整题目只需修改清单。
+
+- 每道题必须标出：题型 `type`、难度 `difficulty`、考查内容 `knowledgePoints`（引用知识点 id）。
+- 知识点必须填写 `observable`（该知识点在实验中能观察到的现象），答题验证后展示给学生。
+- 校验逻辑在 `js/quiz-validator.js`，浏览器加载清单与容器构建（`tools/validate-quiz.js`）使用同一套规则；缺必填内容或引用不存在知识点的条目会给出说明并跳过，清单无有效题目时构建失败、测验模式不可用。
+
+## 八、核心交互流程
 ```mermaid
 flowchart LR
     A[打开应用] --> B{首次使用?}
@@ -172,7 +185,7 @@ flowchart LR
     H --> I[观察光路变化]
 ```
 
-## 八、光路计算原理
+## 九、光路计算原理
 
 ### 8.1 核心规律
 

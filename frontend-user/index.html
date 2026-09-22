@@ -32,8 +32,10 @@
             </button>
         </div>
         <div class="quiz-panel-body">
+            <div class="quiz-question-meta" id="quiz-question-meta"></div>
             <h3 class="quiz-question-title" id="quiz-question-title">题目加载中...</h3>
             <p class="quiz-question-desc" id="quiz-question-desc"></p>
+            <p class="quiz-question-kp" id="quiz-question-kp"></p>
             <div class="quiz-hint-section">
                 <button class="btn btn-secondary btn-sm" id="btn-quiz-hint">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -72,6 +74,7 @@
                     <span class="quiz-result-score-label">分</span>
                 </div>
                 <div class="quiz-result-explanation" id="quiz-result-explanation"></div>
+                <div class="quiz-result-knowledge" id="quiz-result-knowledge"></div>
                 <div class="quiz-result-details" id="quiz-result-details"></div>
                 <div class="quiz-result-stats">
                     <div class="stat-item">
@@ -361,6 +364,8 @@
     <script src="js/lens.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/canvas.js"></script>
+    <script src="data/quiz-manifest.js"></script>
+    <script src="js/quiz-validator.js"></script>
     <script src="js/quiz.js"></script>
     <script src="js/interaction.js"></script>
     <script src="js/guide.js"></script>
