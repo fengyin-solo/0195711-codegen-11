@@ -869,6 +869,75 @@
     flex: 1;
 }
 
+.quiz-question-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
+}
+
+.quiz-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    white-space: nowrap;
+}
+
+.quiz-tag-difficulty.quiz-difficulty-easy {
+    background-color: #E8F5E9;
+    color: var(--color-success);
+}
+
+.quiz-tag-difficulty.quiz-difficulty-medium {
+    background-color: #FFF8E1;
+    color: #B8860B;
+}
+
+.quiz-tag-difficulty.quiz-difficulty-hard {
+    background-color: #FBE9E7;
+    color: var(--color-error);
+}
+
+.quiz-question-content {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+.quiz-kp-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+}
+
+.quiz-kp-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-bg-input);
+    border-left: 3px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+}
+
+.quiz-kp-name {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+}
+
+.quiz-kp-phenomenon {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
 .quiz-question-title {
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-bold);
@@ -983,8 +1052,9 @@
 
 .result-detail-item {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
     padding: var(--spacing-xs) var(--spacing-sm);
     background-color: var(--color-bg-input);
     border-radius: var(--radius-sm);
@@ -993,19 +1063,17 @@
 
 .result-detail-name {
     color: var(--color-text-secondary);
+    font-weight: var(--font-weight-bold);
 }
 
 .result-detail-values {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .result-detail-expected {
-    color: var(--color-text-hint);
-}
-
-.result-detail-arrow {
     color: var(--color-text-hint);
 }
 

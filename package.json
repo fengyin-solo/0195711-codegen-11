@@ -1,0 +1,10 @@
+{
+  "name": "optics-designer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "中学生交互式光学设计工具",
+  "scripts": {
+    "validate-quiz": "node frontend-user/tools/validate-quiz-data.mjs",
+    "serve": "node frontend-user/tools/static-server.mjs"
+  }
+}

@@ -32,8 +32,14 @@
             </button>
         </div>
         <div class="quiz-panel-body">
+            <div class="quiz-question-meta" id="quiz-question-meta">
+                <span class="quiz-tag" id="quiz-question-type"></span>
+                <span class="quiz-tag quiz-tag-difficulty" id="quiz-question-difficulty"></span>
+                <span class="quiz-question-content" id="quiz-question-content"></span>
+            </div>
             <h3 class="quiz-question-title" id="quiz-question-title">题目加载中...</h3>
             <p class="quiz-question-desc" id="quiz-question-desc"></p>
+            <div class="quiz-kp-section" id="quiz-kp-section"></div>
             <div class="quiz-hint-section">
                 <button class="btn btn-secondary btn-sm" id="btn-quiz-hint">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -355,6 +361,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="js/config.js"></script>
+    <script src="js/quiz-data.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/physics.js"></script>

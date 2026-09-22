@@ -119,7 +119,12 @@ class App {
         window.addEventListener('questionChanged', (e) => {
             this.updateQuizPanel(e.detail);
         });
-        
+
+        // 清单不可用（加载失败或没有任何通过校验的题目）
+        window.addEventListener('quizDataUnavailable', (e) => {
+            this.handleQuizDataUnavailable(e.detail);
+        });
+
         // 监听测验停止事件
         window.addEventListener('quizStopped', () => {
             this.hideQuizPanel();
@@ -140,33 +145,49 @@ class App {
     /**
      * 开始测验模式
      */
-    startQuizMode() {
+    async startQuizMode() {
+        // 加载并校验清单（缺少必填内容或引用不存在知识点的题目会被跳过）
+        const ready = await this.quizManager.startQuizMode();
+        if (!ready) return;
+
         // 清空画布
         this.canvasManager.clear();
-        
-        // 启动测验
-        this.quizManager.startQuizMode();
-        
+
         // 更新UI
         const btnQuizMode = document.getElementById('btn-quiz-mode');
         if (btnQuizMode) {
             btnQuizMode.classList.add('active');
             btnQuizMode.querySelector('span').textContent = '退出测验';
         }
-        
+
         // 显示测验面板
         const quizPanel = document.getElementById('quiz-panel');
         if (quizPanel) {
             quizPanel.classList.remove('hidden');
         }
-        
+
         // 添加测验模式类
         const appContainer = document.getElementById('app');
         if (appContainer) {
             appContainer.classList.add('quiz-mode');
         }
-        
-        Utils.showToast('测验模式已开启，祝你好运！', 'success');
+
+        if (this.quizManager.skippedQuestions.length > 0) {
+            Utils.showToast(
+                `题库中有 ${this.quizManager.skippedQuestions.length} 道题因清单不完整被跳过，详见控制台`,
+                'warning'
+            );
+        } else {
+            Utils.showToast('测验模式已开启，祝你好运！', 'success');
+        }
+    }
+
+    /**
+     * 清单不可用时的提示
+     */
+    handleQuizDataUnavailable(detail) {
+        console.error('测验清单不可用：', detail);
+        Utils.showToast('测验题库加载失败或没有可用题目，请检查 data/quiz-manifest.json', 'warning');
     }
     
     /**
@@ -234,23 +255,56 @@ class App {
         // 更新题目标题和描述
         const titleEl = document.getElementById('quiz-question-title');
         const descEl = document.getElementById('quiz-question-desc');
-        
+
         if (titleEl) titleEl.textContent = question.title;
         if (descEl) descEl.textContent = question.description;
-        
+
+        // 题型 / 难度 / 考查内容（均来自清单，新增题目无需改这里）
+        const typeEl = document.getElementById('quiz-question-type');
+        const difficultyEl = document.getElementById('quiz-question-difficulty');
+        const contentEl = document.getElementById('quiz-question-content');
+
+        if (typeEl) typeEl.textContent = this.quizManager.getQuestionTypeLabel(question.questionType);
+        if (difficultyEl) {
+            difficultyEl.textContent = this.quizManager.getDifficultyLabel(question.difficulty);
+            difficultyEl.className = 'quiz-tag quiz-tag-difficulty quiz-difficulty-' + question.difficulty;
+        }
+        if (contentEl) contentEl.textContent = question.content || '';
+
+        // 本题考查的知识点（去重），提示学生应当观察到什么现象
+        const kpSection = document.getElementById('quiz-kp-section');
+        if (kpSection) {
+            const kpIds = [];
+            (question.checks || []).forEach(check => {
+                if (check.knowledgePoint && kpIds.indexOf(check.knowledgePoint) === -1) {
+                    kpIds.push(check.knowledgePoint);
+                }
+            });
+            kpSection.innerHTML = kpIds.map(id => {
+                const kp = this.quizManager.knowledgePoints[id];
+                if (!kp) return '';
+                return `
+                    <div class="quiz-kp-item">
+                        <span class="quiz-kp-name">🔍 ${kp.name}</span>
+                        <span class="quiz-kp-phenomenon">应观察到：${kp.phenomenon}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         // 隐藏提示
         const hintText = document.getElementById('quiz-hint-text');
         if (hintText) {
             hintText.classList.add('hidden');
             hintText.textContent = '';
         }
-        
+
         // 启用提示按钮
         const btnHint = document.getElementById('btn-quiz-hint');
         if (btnHint) {
             btnHint.disabled = false;
         }
-        
+
         // 更新得分显示
         this.updateScoreDisplay();
     }
@@ -349,8 +403,7 @@ class App {
                     <div class="result-detail-item">
                         <span class="result-detail-name">${detail.name}</span>
                         <div class="result-detail-values">
-                            <span class="result-detail-expected">期望：${detail.expected}</span>
-                            <span class="result-detail-arrow">→</span>
+                            <span class="result-detail-expected">应观察到：${detail.expected}</span>
                             <span class="result-detail-actual">实际：${detail.actual}</span>
                             <span class="result-detail-status ${detail.correct ? 'correct' : 'incorrect'}">
                                 ${detail.correct ? '✓' : '✗'}

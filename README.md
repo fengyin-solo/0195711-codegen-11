@@ -3,13 +3,17 @@
 ## How to Run
 
 ```bash
-# Docker 运行（推荐）
+# Docker 运行（推荐，构建和启动时都会校验测验题库清单）
 docker-compose up --build -d
 
 # 访问应用
 # 用户端: http://localhost:8081
 
-# 或直接用浏览器打开 frontend-user/index.html
+# 本地开发：启动零依赖静态服务器（题库通过 fetch 加载，需经 HTTP 访问）
+npm run serve          # http://localhost:8081
+
+# 仅校验测验题库清单（本地与容器构建/启动使用同一套校验）
+npm run validate-quiz
 ```
 
 ## Services
@@ -21,6 +25,30 @@ docker-compose up --build -d
 ## 测试账号
 
 本项目为纯前端应用，无需登录账号。
+
+## 测验题库维护
+
+题目、考查知识点与答题提示统一维护在 **`frontend-user/data/quiz-manifest.json`** 一份清单里：
+
+- `knowledgePoints`：知识点，每条必须包含 `id`、`name`、`description` 和 **`phenomenon`（答这道题时能观察到什么现象）**；
+- `questions`：题目，每道题标出 **题型 `questionType`**、**难度 `difficulty`** 与 **考查内容 `content`**，并包含题干、`hint` 答题提示、`checks` 答案校验项和 `feedback` 答题后提示；
+- 每个校验项通过 `knowledgePoint` 引用知识点，答题结果中会展示该知识点对应的现象。
+
+校验规则（`frontend-user/js/quiz-data.js`，浏览器与 Node 共用）：
+
+- 清单缺少必填内容（题型、难度、考查内容、提示、校验项、现象等）→ 输出原因并**跳过该条**；
+- 题目引用了不存在的知识点（或知识点缺少现象描述）→ 输出原因并**跳过该条**；
+- 整份清单没有任何可用题目、或 JSON 无法解析 → 校验失败退出（本地命令返回非零、Docker 构建/启动中止）。
+
+**调整或新增题目只需编辑这份 JSON，不需要改动页面代码。** 校验入口：
+
+```bash
+# 本地开发
+npm run validate-quiz
+
+# 容器：多阶段构建时执行一次，容器启动时由 entrypoint 再执行一次，同一脚本
+docker-compose up --build
+```
 
 ## 题目内容
 

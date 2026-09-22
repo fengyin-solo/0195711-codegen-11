@@ -138,16 +138,23 @@ erDiagram
 ```
 frontend-user/
 ├── index.html          # 主入口
-├── Dockerfile          # Docker配置
+├── Dockerfile          # Docker配置（多阶段构建：先校验题库清单再打包）
+├── docker-entrypoint.sh # 容器启动时执行同一套题库校验
+├── data/
+│   └── quiz-manifest.json  # 测验清单：题目 + 知识点（含可观察现象）+ 提示
 ├── css/
 │   ├── reset.css       # 样式重置
 │   ├── variables.css   # CSS变量
 │   ├── layout.css      # 布局样式
 │   ├── components.css  # 组件样式
 │   └── responsive.css  # 响应式样式
+├── tools/
+│   ├── validate-quiz-data.mjs # 清单校验脚本（本地开发/Docker共用）
+│   └── static-server.mjs      # 本地开发零依赖静态服务器
 └── js/
     ├── app.js          # 应用入口
     ├── config.js       # 配置常量
+    ├── quiz-data.js    # 测验清单加载与校验（浏览器/Node 同构）
     ├── storage.js      # 本地存储
     ├── guide.js        # 引导系统
     ├── canvas.js       # 画布管理
@@ -156,6 +163,16 @@ frontend-user/
     ├── interaction.js  # 交互处理
     └── utils.js        # 工具函数
 ```
+
+### 6.1 测验题库维护方式
+
+题目、考查知识点与答题提示集中在 `data/quiz-manifest.json` 维护，调整题目无需修改页面代码：
+
+- 每道题标注题型（questionType）、难度（difficulty）、考查内容（content）；
+- 知识点必须写清 `phenomenon`——验证答案时向学生展示「能观察到什么现象」；
+- 题目的每个 `checks` 校验项通过 `knowledgePoint` 引用知识点；
+- 校验逻辑见 `js/quiz-data.js`，浏览器加载与 `tools/validate-quiz-data.mjs`（本地开发、Docker 构建及容器启动）使用同一份代码；
+- 缺少必填内容或引用不存在知识点的条目会被说明原因并跳过；无任何可用题目时阻断启动。
 
 ## 七、核心交互流程
 
